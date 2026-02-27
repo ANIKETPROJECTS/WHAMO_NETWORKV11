@@ -716,14 +716,14 @@ export function Header({
 
                       <div className="max-h-[200px] overflow-auto">
                         <Label className="mb-2 block">Current Requests ({requestType})</Label>
-                        {outputRequests
+                        {[...outputRequests]
                           .filter((req) => req.requestType === requestType)
                           .sort((a, b) => {
                             const elA = nodes.find((n) => n.id === a.elementId) || edges.find((e) => e.id === a.elementId);
                             const elB = nodes.find((n) => n.id === b.elementId) || edges.find((e) => e.id === b.elementId);
                             
                             const getSortKey = (el) => {
-                              if (!el) return "";
+                              if (!el) return "zzzz";
                               if (el.data?.nodeNumber !== undefined) return `node-${String(el.data.nodeNumber).padStart(10, '0')}`;
                               return `edge-${el.data?.label || el.id}`;
                             };
@@ -741,7 +741,7 @@ export function Header({
                           );
                           return (
                             <div
-                              key={req.id}
+                              key={`${req.id}-${req.requestType}`}
                               className="flex items-center justify-between text-sm py-1 border-b"
                             >
                               <span>
