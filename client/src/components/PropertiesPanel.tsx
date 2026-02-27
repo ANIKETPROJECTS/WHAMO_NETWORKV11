@@ -59,6 +59,9 @@ export function PropertiesPanel() {
       elevation: 'elevation',
       tankTop: 'elevation',
       tankBottom: 'elevation',
+      initialWaterLevel: 'elevation',
+      riserDiameter: 'diameter',
+      riserTop: 'elevation',
       distance: 'length',
       celerity: 'celerity',
       area: 'area'
@@ -311,6 +314,26 @@ export function PropertiesPanel() {
           {isNode && element.data?.type === 'surgeTank' && (
             <>
               <div className="grid gap-2">
+                <Label htmlFor="st-type">Tank Type</Label>
+                <Select 
+                  value={element.data?.type_st || 'SIMPLE'} 
+                  onValueChange={(v) => {
+                    handleChange('type', v);
+                    handleChange('type_st', v); // Duplicate for legacy/display if needed
+                  }}
+                >
+                  <SelectTrigger id="st-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SIMPLE">SIMPLE</SelectItem>
+                    <SelectItem value="DIFFERENTIAL">DIFFERENTIAL</SelectItem>
+                    <SelectItem value="AIRTANK">AIRTANK</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
                 <Label htmlFor="tankTop">Top Elevation ({currentUnit === 'SI' ? 'm' : 'ft'})</Label>
                 <Input 
                   id="tankTop" 
@@ -328,6 +351,42 @@ export function PropertiesPanel() {
                   onChange={(e) => handleChange('tankBottom', e.target.value)} 
                 />
               </div>
+
+              {(element.data?.type === 'AIRTANK' || element.data?.type === 'DIFFERENTIAL') && (
+                <div className="grid gap-2">
+                  <Label htmlFor="htank">Initial Water Level (HTANK) ({currentUnit === 'SI' ? 'm' : 'ft'})</Label>
+                  <Input 
+                    id="htank" 
+                    type="number" 
+                    value={Number(element.data?.initialWaterLevel) || 0} 
+                    onChange={(e) => handleChange('initialWaterLevel', e.target.value)} 
+                  />
+                </div>
+              )}
+
+              {element.data?.type === 'DIFFERENTIAL' && (
+                <>
+                  <div className="grid gap-2">
+                    <Label htmlFor="riserdiam">Riser Diameter ({currentUnit === 'SI' ? 'm' : 'ft'})</Label>
+                    <Input 
+                      id="riserdiam" 
+                      type="number" 
+                      value={Number(element.data?.riserDiameter) || 0} 
+                      onChange={(e) => handleChange('riserDiameter', e.target.value)} 
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="risertop">Riser Top Elevation ({currentUnit === 'SI' ? 'm' : 'ft'})</Label>
+                    <Input 
+                      id="risertop" 
+                      type="number" 
+                      value={Number(element.data?.riserTop) || 0} 
+                      onChange={(e) => handleChange('riserTop', e.target.value)} 
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="flex items-center space-x-2 my-2">
                 <Checkbox 
                   id="hasShape" 
@@ -369,6 +428,38 @@ export function PropertiesPanel() {
                   />
                 </div>
               </div>
+
+              <div className="flex items-center space-x-2 my-2">
+                <Checkbox 
+                  id="hasAddedLossST" 
+                  checked={element.data?.hasAddedLoss || false} 
+                  onCheckedChange={(checked) => handleChange('hasAddedLoss', !!checked)}
+                />
+                <Label htmlFor="hasAddedLossST" className="font-semibold text-primary">Added Loss Coefficients</Label>
+              </div>
+
+              {element.data?.hasAddedLoss && (
+                <div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-md border border-border/50 mb-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="st-cplus">CPLUS</Label>
+                    <Input 
+                      id="st-cplus" 
+                      type="number" 
+                      value={element.data?.cplus || 0} 
+                      onChange={(e) => handleChange('cplus', e.target.value)} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="st-cminus">CMINUS</Label>
+                    <Input 
+                      id="st-cminus" 
+                      type="number" 
+                      value={element.data?.cminus || 0} 
+                      onChange={(e) => handleChange('cminus', e.target.value)} 
+                    />
+                  </div>
+                </div>
+              )}
 
               {element.data?.hasShape && (
                 <div className="space-y-3 mt-4">

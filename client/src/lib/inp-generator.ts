@@ -257,9 +257,24 @@ export function generateInpFile(nodes: WhamoNode[], edges: WhamoEdge[], autoDown
     const unit = d.unit || globalUnit;
     addComment(d.comment);
     addL('SURGETANK ');
-    addL(` ID ${d.label}`);
+    addL(` ID ${d.label} ${d.type || 'SIMPLE'}`);
     addL(` ELBOTTOM ${toFPS(Number(d.tankBottom), unit, 'elevation')}`);
     addL(` ELTOP ${toFPS(Number(d.tankTop), unit, 'elevation')}`);
+
+    if (d.type === 'AIRTANK' || d.type === 'DIFFERENTIAL') {
+      if (d.initialWaterLevel !== undefined) {
+        addL(` HTANK ${toFPS(Number(d.initialWaterLevel), unit, 'elevation')}`);
+      }
+    }
+
+    if (d.type === 'DIFFERENTIAL') {
+      if (d.riserDiameter !== undefined) {
+        addL(` RISERDIAM ${toFPS(Number(d.riserDiameter), unit, 'diameter')}`);
+      }
+      if (d.riserTop !== undefined) {
+        addL(` RISERTOP ${toFPS(Number(d.riserTop), unit, 'elevation')}`);
+      }
+    }
     
     if (d.hasShape && d.shape && Array.isArray(d.shape) && d.shape.length > 0) {
       addL(' SHAPE');
@@ -273,6 +288,13 @@ export function generateInpFile(nodes: WhamoNode[], edges: WhamoEdge[], autoDown
 
     addL(` CELERITY ${toFPS(Number(d.celerity), unit, 'celerity')}`);
     addL(` FRICTION ${d.friction}`);
+
+    if (d.hasAddedLoss) {
+      addL(' ADDEDLOSS');
+      addL(`     CPLUS ${d.cplus || 0}`);
+      addL(`     CMINUS ${d.cminus || 0}`);
+    }
+
     addL('FINISH');
     addL('');
   });

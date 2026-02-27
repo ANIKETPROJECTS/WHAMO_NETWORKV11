@@ -39,14 +39,24 @@ export const junctionPropsSchema = z.object({
   comment: z.string().optional(),
 });
 
+export const surgeTankTypeSchema = z.enum(["SIMPLE", "DIFFERENTIAL", "AIRTANK"]);
+export type SurgeTankType = z.infer<typeof surgeTankTypeSchema>;
+
 export const surgeTankPropsSchema = z.object({
   id: z.string(),
   nodeNumber: z.number().int(),
+  type: surgeTankTypeSchema.default("SIMPLE"),
   tankTop: z.number(),
   tankBottom: z.number(),
   diameter: z.number().optional(),
+  initialWaterLevel: z.number().optional(), // HTANK
+  riserDiameter: z.number().optional(),     // RISERDIAM
+  riserTop: z.number().optional(),          // RISERTOP
   celerity: z.number().default(0),
   friction: z.number().default(0),
+  hasAddedLoss: z.boolean().default(false),
+  cplus: z.number().optional(),
+  cminus: z.number().optional(),
   hasShape: z.boolean().default(false),
   shape: z.array(z.object({
     e: z.number(),
