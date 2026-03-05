@@ -619,7 +619,7 @@ function DesignerInner() {
                           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">Node/Junction</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-5 h-[2px] bg-[#7f8c8d]" />
+                          <div className="w-5 h-[2px] bg-[#3498db]" />
                           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">Conduit</span>
                         </div>
                       </div>
@@ -659,16 +659,42 @@ function DesignerInner() {
                     </div>
                   </div>
                   
-                  <div className="flex-1 overflow-auto bg-slate-50/50 p-8 scrollbar-hide">
-                    <div 
-                      id="system-diagram-container"
-                      className="min-w-fit min-h-fit bg-white rounded-2xl shadow-sm border border-slate-200/60 p-12 transition-all duration-300"
-                      dangerouslySetInnerHTML={{ __html: diagramSvg || '' }} 
-                    />
+                  <div className="flex-1 overflow-auto bg-slate-100/50 relative">
+                    <TransformWrapper
+                      initialScale={1}
+                      minScale={0.1}
+                      maxScale={4}
+                      centerOnInit={false}
+                      limitToBounds={false}
+                    >
+                      <TransformComponent
+                        wrapperStyle={{
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        contentStyle={{
+                          width: "max-content",
+                          height: "max-content",
+                          padding: "100px",
+                        }}
+                      >
+                        <div 
+                          id="system-diagram-container"
+                          className="bg-white shadow-2xl rounded-2xl border border-slate-200 p-20"
+                          style={{ 
+                            width: "max-content", 
+                            height: "max-content",
+                            minWidth: "1200px",
+                            minHeight: "800px"
+                          }}
+                          dangerouslySetInnerHTML={{ __html: diagramSvg || '' }} 
+                        />
+                      </TransformComponent>
+                    </TransformWrapper>
                   </div>
 
                   {/* Absolute positioning for controls */}
-                  <div className="absolute bottom-6 right-6 flex flex-col gap-2">
+                  <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
                     <Button
                       size="icon"
                       variant="secondary"

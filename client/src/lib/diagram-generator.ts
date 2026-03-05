@@ -43,9 +43,31 @@ export function generateSystemDiagramSVG(nodes: WhamoNode[], edges: WhamoEdge[],
   // Ensure all nodes have a level even if not reachable from sources
   diagramNodes.forEach(n => {
     if (levels[n.id] === undefined) {
-      levels[n.id] = 0;
+      // Find if this node has any outgoing edges to nodes that DO have levels
+      // This helps with downstream/reversed networks
+      const outgoing = adj[n.id] || [];
+      const neighborWithLevel = outgoing.find(v => levels[v] !== undefined);
+      if (neighborWithLevel !== undefined) {
+        levels[n.id] = Math.max(0, levels[neighborWithLevel] - 1);
+      } else {
+        levels[n.id] = 0;
+      }
     }
   });
+
+  // Second pass for levels to ensure proper spacing for downstream nodes
+  let changed = true;
+  while (changed) {
+    changed = false;
+    edges.forEach(e => {
+      if (levels[e.source] !== undefined && levels[e.target] !== undefined) {
+        if (levels[e.target] <= levels[e.source]) {
+          levels[e.target] = levels[e.source] + 1;
+          changed = true;
+        }
+      }
+    });
+  }
 
   // Group nodes by level
   const levelsMap: Record<number, string[]> = {};
@@ -63,8 +85,9 @@ export function generateSystemDiagramSVG(nodes: WhamoNode[], edges: WhamoEdge[],
   });
 
   const numLevels = Object.keys(levelsMap).length;
-  const svgWidth = Math.max(1300, (numLevels + 1) * spacingX);
-  const svgHeight = Math.max(750, (maxNodesInLevel + 1) * spacingY);
+  // Increase SVG size to ensure everything fits comfortably
+  const svgWidth = Math.max(1600, (numLevels + 1) * spacingX + 200);
+  const svgHeight = Math.max(900, (maxNodesInLevel + 1) * spacingY + 200);
 
   Object.entries(levelsMap).forEach(([lvlStr, nodeIds]) => {
     const lvl = parseInt(lvlStr);
@@ -73,7 +96,7 @@ export function generateSystemDiagramSVG(nodes: WhamoNode[], edges: WhamoEdge[],
     
     nodeIds.forEach((id, idx) => {
       posMap[id] = {
-        x: 80 + lvl * spacingX,
+        x: 100 + lvl * spacingX,
         y: startY + idx * spacingY
       };
     });
@@ -82,7 +105,7 @@ export function generateSystemDiagramSVG(nodes: WhamoNode[], edges: WhamoEdge[],
   const findNode = (id: string) => nodes.find(n => n.id === id);
 
   let svgContent = `
-    <svg id="system-diagram-svg" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" class="w-full h-full bg-white">
+    <svg id="system-diagram-svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" class="bg-white">
       <style>
         .diagram-edge, .node { cursor: pointer; }
         .diagram-edge:hover path { stroke-width: 5; stroke: #2980b9; }
